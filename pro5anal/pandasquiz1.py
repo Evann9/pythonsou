@@ -19,7 +19,7 @@ print()
 numbers = pd.DataFrame(np.arange(10,50,10), columns=['numbers'], index=['a','b','c','d'])
 print(numbers)
 # b) c row의 값을 가져오시오.
-print(numbers.loc["c"])
+print(numbers.loc[["c"]])
 # c) a, d row들의 값을 가져오시오.
 print(numbers.iloc[0:4:3])
 # d) numbers의 합을 구하시오.
@@ -35,7 +35,6 @@ print(numbers)
 # g) names라는 이름의 다음과 같은 칼럼을 위의 결과에 또 추가하시오. Series 클래스 사용.
 names = pd.Series(['길동','오정','팔계','오공'], index=['d','a','b','c'])
 print(names)
-print()
 numbers['names'] = names
 print(numbers)
 
@@ -78,7 +77,6 @@ print(da)
 # print(da)
 da['total'] = da['price'] * da['stock']
 print(da)
-print('-----00------')
 # 3) 컬럼 이름을 다음과 같이 변경하시오. 원본 갱신
 #    product → 상품명,  price → 가격,  stock → 재고,  total → 총가격
 da.columns = ['상품명', '가격', '재고', '총가격']
@@ -86,9 +84,7 @@ print(da)
 # 4) 재고(재고 컬럼)가 3 이하인 행의 정보를 추출하시오.
 print(da[da['재고'] <= 3])
 # 5) 인덱스가 p2인 행을 추출하는 두 가지 방법(loc, iloc)을 코드로 작성하시오.
-print('---' * 10)
 print(da.loc[['p2']])
-print('---' * 10)
 print(da.iloc[[1]])
 # 6) 인덱스가 p3인 행을 삭제한 뒤, 그 결과를 확인하시오. (원본이 실제로 바뀌지 않도록, 즉 drop()의 기본 동작으로)
 imsi = da.drop(['p3'])
