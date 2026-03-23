@@ -112,18 +112,19 @@ print(f'전체 한 번에 처리 시간 : {time_all:7f}초')
 print(f'청크 단위 처리 시간 : {time_chunk_total:7f}초')
 
 # chunk 처리 시간 시각화
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt  # 시각화 라이브러리 임포트
 
-plt.rc('font', family='Malgun Gothic')
+plt.rc('font', family='Malgun Gothic')  # 한글 깨짐 방지를 위한 폰트 설정
 lables = ['전체 한번에 처리', '청크 단위 처리']
 times = [time_all, time_chunk_total]
 
-plt.figure(figsize=(6,4))
-bars = plt.bar(lables, times, color=['skyblue', 'red'])
+plt.figure(figsize=(6,4))  # 그래프 크기 설정 (가로, 세로)
+bars = plt.bar(lables, times, color=['skyblue', 'red'])  # 막대 그래프 생성
 for bar, time_val in zip(bars, times):
+    # plt.text: 그래프 위에 텍스트(시간) 표시
     plt.text(bar.get_x() + bar.get_width()/2, bar.get_height(), f'{time_val:3f}초', ha='center', va='bottom', fontsize=10)
 
-plt.ylabel('처리시간(초)')
-plt.grid(linestyle='--')
-plt.tight_layout()
-plt.show()
+plt.ylabel('처리시간(초)')  # y축 라벨 설정
+plt.grid(linestyle='--')  # 격자선 추가
+plt.tight_layout()  # 여백 자동 조절
+plt.show()  # 그래프 출력

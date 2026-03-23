@@ -65,12 +65,12 @@ with pd.ExcelWriter('report.xlsx', engine='openpyxl') as writer:
                 cell.number_format = '#,##0'
 
     # 엑셀 테이블 스타일 추가
-    from openpyxl.worksheet.table import Table, TableStyleInfo
+    from openpyxl.worksheet.table import Table, TableStyleInfo  # 엑셀 테이블 객체 및 스타일 모듈
 
     # 테이블 범위 설정 (A3부터 마지막 데이터까지)
-    tab = Table(displayName="Table1", ref=f"A3:D{len(df)+3}")
+    tab = Table(displayName="Table1", ref=f"A3:D{len(df)+3}")  # 테이블 이름과 데이터 범위 정의
 
-    # 테이블 스타일 지정
+    # TableStyleInfo: 테이블의 시각적 스타일(줄무늬, 열 강조 등) 설정
     style = TableStyleInfo(
         name="TableStyleMedium9",   # 엑셀 기본 스타일
         showFirstColumn=False,
