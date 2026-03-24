@@ -55,3 +55,23 @@ plt.subplot(2, 1, 2) # 2행 1열 2행
 plt.plot(x, y_cos)
 plt.title('cosine')
 plt.show()
+
+print()
+irum = ['a', 'b', 'c', 'd', 'e']
+kor = [80, 50, 70, 70, 90]
+eng = [60, 70, 80, 90, 100]
+plt.plot(irum, kor, 'ro-')
+plt.plot(irum, eng, 'bo--')
+plt.ylim([50, 100])
+plt.title('시험 점수')
+plt.legend(['국어', '영어'], loc=4)   # loc = 'best' : 자동으로 범례 위치 설정
+plt.grid(True)
+
+fig = plt.gcf()
+plt.show()
+fig.savefig('plot1.png')
+
+from matplotlib.pyplot import imread
+img = imread('plot1.png')
+plt.imshow(img)
+plt.show()
