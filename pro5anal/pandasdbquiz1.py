@@ -77,7 +77,7 @@ try:
 #      - [문제] 부서별 연봉 평균을 계산하여 가로 막대 그래프(barh)로 시각화하세요.
     pay_mean = df.groupby(['부서명'])['연봉'].mean()  
     # print(pay_mean)
-    plt.barh(pay_mean.index, pay_mean.values)  # explode: 조각 돌출, shadow: 그림자
+    plt.barh(pay_mean.index, pay_mean.values) 
     plt.show()
 
 except Exception as e:
@@ -85,37 +85,3 @@ except Exception as e:
 finally:
     cursor.close()
     conn.close()
-
-#  b) MariaDB에 저장된 jikwon 테이블을 이용하여 아래의 문제에 답하시오.
-#      - pivot_table을 사용하여 성별 연봉의 평균을 출력
-#      - 성별(남, 여) 연봉의 평균으로 시각화 - 세로 막대 그래프
-#      - 부서명, 성별로 교차 테이블을 작성 (crosstab(부서명, 성별))
-
-
-#  c) 키보드로 사번, 직원명을 입력받아 로그인에 성공하면 console에 아래와 같이 출력하시오.
-#       조건 :  try ~ except MySQLdb.OperationalError as e:      사용
-#      사번  직원명  부서명   직급  부서명전화  성별
-#      ...
-#      인원수 : * 명
-#     - 성별 연봉 분포 + 이상치 확인    <== 그래프 출력
-#     - Histogram (분포 비교) : 남/여 연봉 분포 비교    <== 그래프 출력
-
-
-
-# pandas 문제 8)
-
-# MariaDB에 저장된 jikwon, buser 테이블을 이용하여 아래의 문제에 답하시오.
-
-# Django(Flask) 모듈을 사용하여 결과를 클라이언트 브라우저로 출력하시오.
-
-
-
-#    1) 사번, 직원명, 부서명, 직급, 연봉, 근무년수를 DataFrame에 기억 후 출력하시오. (join)
-
-#        : 부서명번호, 직원명 순으로 오름 차순 정렬 
-
-#    2) 부서명, 직급 자료를 이용하여  각각 연봉합, 연봉평균을 구하시오.
-
-#    3) 부서명별 연봉합, 평균을 이용하여 세로막대 그래프를 출력하시오.
-
-#    4) 성별, 직급별 빈도표를 출력하시오.
