@@ -37,3 +37,33 @@ if response.status_code == 200:
         else:
             word_dict[i] = 1
     print('word_dict : ', word_dict)
+
+    print("Series로 출력 ------")
+    seri_list = pd.Series(word_dict)
+    print(seri_list[:3])
+    print(seri_list.value_counts()[:5])
+    print()
+    seri_dict = pd.Series(word_dict)
+    print(seri_dict[:3])
+    print(seri_dict.value_counts()[:5])
+
+    print("DataFrame으로 출력 ------")
+    df1 = pd.DataFrame(wordlist, columns=['단어'])
+    print(df1.head(3))
+    df2 = pd.DataFrame([word_dict.keys(), word_dict.values()])
+    df2 = df2.T
+    df2.columns = ['단어', '빈도']
+    print(df2.head(3))
+    
+    df2.to_csv('nlp_morph2.csv', index=False)
+
+    df3 = pd.read_csv('nlp_morph2.csv')
+    # print(df3.head())
+    
+count = Counter(result)
+# print(count)
+tag = count.most_common(50)
+# print(tag)
+
+
+
