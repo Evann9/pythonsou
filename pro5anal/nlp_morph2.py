@@ -59,11 +59,7 @@ if response.status_code == 200:
 
     df3 = pd.read_csv('nlp_morph2.csv')
     # print(df3.head())
-    
-count = Counter(result)
-# print(count)
-tag = count.most_common(50)
-# print(tag)
+
 
 
 
