@@ -59,7 +59,7 @@ print()
 # 예측값 확인하기
 glm_pred = glm_model.predict(df_weekend['소득수준'][:10]) 
 print("glm 예측값 :", np.around(glm_pred.values))    # [1. 0. 0. 0. 1. 1. 0. 0. 1. 1.]
-print('실제값 :',df_weekend['외식유무'][:10].values) # [0 0 0 0 1 1 0 0 1 1]
+print('실제값 :',df_weekend['외식유무'][:10].values) # [0  0  0  0  1  1  0  0  1  1]
 
 # glm_model 정확도 확인하기 - accuracy_score 사용
 glm_pred2 = glm_model.predict(df_weekend['소득수준'])
