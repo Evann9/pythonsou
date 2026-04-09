@@ -35,6 +35,7 @@ f_value = model.decision_function(x_scaled)
 
 # 성능 지표 출력
 print(metrics.classification_report(y, y_hat))
+print('정확도:', metrics.accuracy_score(y, y_hat))
 print('AUC:', metrics.roc_auc_score(y, f_value))
 
 # ROC Curve 시각화
