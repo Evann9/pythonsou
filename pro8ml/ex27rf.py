@@ -21,6 +21,7 @@ print(df.shape) # (714, 12)
 
 df_x = df[['Pclass','Age','Sex']]  # 독립변수(feature)
 print(df_x.head(3))
+
 # 전처리 성별 열 : Label Encoding(문자범주형 -> 정수형)
 from sklearn.preprocessing import LabelEncoder
 encoder = LabelEncoder()
@@ -54,3 +55,58 @@ print('전체 대비 맞춘 비율 : ', (len(test_y) - (test_y != pred).sum()) /
 # 전체 대비 맞춘 비율 :  0.827906976744186
 print('분류 정확도 : ', accuracy_score(test_y, pred))
 # 분류 정확도 :  0.827906976744186
+
+# 교차검증 (K-Fold)
+cross_vali = cross_val_score(model, df_x, df_y, cv=5)
+print(cross_vali)
+# [0.75524476 0.8041958  0.81818182 0.83216783 0.83098592]
+print('교차 검증 평균 정확도 : ', np.round(np.mean(cross_vali), 5))
+# 교차 검증 평균 정확도 :  0.80816
+
+print('\n 중요 변수 확인----')
+print('특성(변수) 중요도 : ', model.feature_importances_) # [0.16172779 0.49842824 0.33984396]
+# model.feature_importances_  : 각 특성이 예측에 기여한 정도(중요도)를 수치로 표현
+# 값의 합은 1.0, 수치가 클수록 해당 변수가 불순도 감소에 더 많이 기여함.
+
+# 시각화
+import matplotlib.pyplot as plt
+n_features = df_x.shape[1]
+plt.barh(range(n_features), model.feature_importances_, align='center')
+plt.xlabel('Feature importance Score')
+plt.ylabel('Features')
+plt.yticks(np.arange(n_features), df_x.columns)
+plt.ylim(-1, n_features)
+plt.show()
+
+print()
+# 전체 변수 대상으로 중요도 확인
+# Name, Ticket, Cabin : 문자형 - 바로 사용 불가 (Encoding 필요)
+# PassengerId, Name : Survived와 관련 없는 변수
+
+df_x2 = df[['Pclass', 'Age', 'Sex', 'Fare', 'SibSp', 'Parch']]
+
+df_x2.loc[:, 'Sex'] = encoder.fit_transform(df_x2['Sex'])
+
+model2 = RandomForestClassifier(n_estimators=500, random_state=12)
+model2.fit(df_x2, df_y)
+
+importances = model2.feature_importances_
+feature_df = pd.DataFrame({'feature': df_x2.columns, 'importance': importances})
+feature_df = feature_df.sort_values(by='importance', ascending=False)
+print('\n전체 변수 대상 중요도:\n', feature_df)
+#    feature  importance
+# 1     Age    0.290795
+# 3    Fare    0.268924
+# 2     Sex    0.257513
+# 0  Pclass    0.098518
+# 4   SibSp    0.047120
+# 5   Parch    0.037130
+
+# 시각화 
+import seaborn as sns
+plt.figure(figsize=(8,5))
+sns.barplot(x='importance', y='feature', data=feature_df, orient='h')
+plt.xlabel('Feature importance Score')
+plt.ylabel('Features')
+plt.tight_layout()
+plt.show()
