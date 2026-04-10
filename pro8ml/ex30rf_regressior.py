@@ -81,7 +81,8 @@ search = RandomizedSearchCV(
     scoring='r2',
     cv = 3,
     random_state=42,
-    verbose=1
+    verbose=1,
+    n_jobs=-1
 )
 
 search.fit(x_train, y_train)  # 탐색 학습
