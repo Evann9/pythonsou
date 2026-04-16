@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, confusion_matrix,classification_report
-"""# SVM 분류 모델로 이미지 분류
+# SVM 분류 모델로 이미지 분류
 # 세계 정치인 중 일부 얼굴 사진 데이터를 사용
 
 faces = fetch_lfw_people(min_faces_per_person=60, color=False, resize=0.5)
@@ -294,3 +294,4 @@ try:
 
 except Exception as e:
     print(f"외부 이미지 처리 중 오류 발생: {e}")
+"""
