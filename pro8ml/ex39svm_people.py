@@ -8,9 +8,20 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, confusion_matrix,classification_report
-# SVM 분류 모델로 이미지 분류
-# 세계 정치인 중 일부 얼굴 사진 데이터를 사용
 
+# ------------------------------------------------------------
+# 얼굴 이미지 분류 예제
+# 1) LFW 얼굴 데이터셋 로드
+# 2) PCA로 차원 축소
+# 3) SVM으로 인물 분류
+# 4) 성능 평가 및 시각화
+# 5) 외부 이미지 예측
+# ------------------------------------------------------------
+
+# LFW 얼굴 데이터셋을 불러온다.
+# faces.data   : 2차원 학습용 배열 (샘플 수, 픽셀 수)
+# faces.images : 원본 이미지 형태를 유지한 3차원 배열
+# faces.target : 각 이미지의 정답 라벨 번호
 faces = fetch_lfw_people(min_faces_per_person=60, color=False, resize=0.5)
 # min_faces_per_person = n : 한사람 당 n장 이상의 사진이 있는 자료만 사용
 # print(faces)
@@ -24,23 +35,26 @@ print()
 print(faces.images[1])
 print(faces.target_names[faces.target[1]])
 
-# 이미지 시각화
+# 샘플 이미지 한 장을 먼저 확인
 plt.imshow(faces.images[1], cmap='bone')
 plt.show()
 
-# 이미지 15개 시각화
+# 여러 샘플을 함께 보며 데이터셋 구성을 확인
 fig, ax = plt.subplots(3, 5)
 for i, axi, in enumerate(ax.flat):
     axi.imshow(faces.images[i], cmap='bone')
     axi.set(xticks=[], yticks=[], xlabel=faces.target_names[faces.target[i]])
 plt.show()
 
-# 주성분 분석으로 이미지 차원을 축소시켜 분류작업을 진행
-# 설명력 95% 되는 최소 개수를 얻기
+# -------------------- PCA 차원 축소 --------------------
+# 설명력 95%를 만족하는 최소 주성분 수를 먼저 확인
+# PCA는 고차원 얼굴 이미지를 더 작은 특징 벡터로 압축한다.
+# 이렇게 줄인 특징은 SVM이 학습하기 쉬운 형태가 된다.
 pca = PCA(n_components=0.95)
 x_pca = pca.fit_transform(faces.data)
 print(pca.n_components_)  # 184
 
+# 이후에는 주성분 150개를 사용해 분류용 특징을 만든다.
 n = 150
 m_pca = PCA(n_components=n, whiten=True, random_state=0) # whiten=True : 주성분의 스케일이 작아지도록 조절
 x_low = m_pca.fit_transform(faces.data)
@@ -81,7 +95,11 @@ plt.tight_layout()
 plt.show()  # 원본과 복원된 이미지의 기본 특징은 크게 차이가 없다.  (패턴이 유지됨)
 
 print()
+# -------------------- SVM 분류 모델 --------------------
 # 분류 모델 생성
+# make_pipeline()으로 PCA 변환 -> SVM 분류를 한 번에 묶어 처리한다.
+# fit() 때는 PCA 학습과 분류기 학습이 순서대로 수행되고,
+# predict() 때는 같은 전처리 흐름이 자동으로 재사용된다.
 svcmodel = SVC(C = 1, random_state = 0)
 mymodel = make_pipeline(m_pca, svcmodel) # PCA와 분류기를 하나의 파이프라인으로 묶어 순차적으로 실행
 print('mymodel :', mymodel)
@@ -89,7 +107,10 @@ print('mymodel :', mymodel)
 #                 ('svc', SVC(C=1, random_state=0))])
 mymodel.fit(faces.data, faces.target)
 
+# -------------------- 학습 / 평가 --------------------
 # train / test split 
+# 전체 데이터를 학습용/평가용으로 나눠서 일반화 성능을 확인한다.
+# stratify=faces.target 은 인물별 비율이 train/test에 비슷하게 유지되게 한다.
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, confusion_matrix,classification_report
 x_train, x_test, y_train, y_test = train_test_split(faces.data, faces.target, stratify=faces.target, random_state=0)
@@ -97,6 +118,7 @@ print(x_train.shape, x_test.shape)  # (1011, 2914) (337, 2914)
 
 mymodel.fit(x_train, y_train)
 y_pred = mymodel.predict(x_test)
+# y_pred는 테스트 이미지 각각에 대해 예측한 인물 라벨 번호다.
 print('예측값 : ', y_pred[:10])
 print('실제값 : ', y_test[:10])
 # 예측값 :  [3 7 1 1 2 7 3 1 3 3]
@@ -133,11 +155,13 @@ print(classification_report(y_test, y_pred, target_names=faces.target_names))
 #      weighted avg       0.82      0.76      0.75       337
 
 print('\n분류결과 시각화---')
+# -------------------- 예측 결과 시각화 --------------------
 # plt.subplots(1,1)
 # plt.imshow(x_test[0].reshape(62, 47), cmap='bone') # 1차원 -> 2차원으로 변환
 # plt.show()
 
 # 여러개 보기
+# 파란색 라벨은 정답, 빨간색 라벨은 오답으로 예측한 경우를 뜻한다.
 fig, ax = plt.subplots(4, 6)
 for i, ax in enumerate(ax.flat):
     ax.imshow(x_test[i].reshape(62, 47), cmap='bone')
@@ -149,6 +173,7 @@ plt.tight_layout()
 plt.show() 
 
 # 오차 행렬 시각화 (heatmap)
+# 어떤 인물끼리 자주 혼동되는지 한눈에 확인할 수 있다.
 import seaborn as sns
 # cm = confusion_matrix(y_test, y_pred)
 # cm_df = pd.DataFrame(cm, index=faces.target_names, columns=faces.target_names)
@@ -160,6 +185,7 @@ plt.title('Confusion Matrix')
 plt.show()
 
 # PCA 누적 분산 그래프 (왜 n_conponents=n 인가?)
+# 주성분 개수가 늘어날수록 원본 정보를 얼마나 더 설명하는지 보여준다.
 import numpy as np
 plt.plot(np.cumsum(m_pca.explained_variance_ratio_))
 plt.xlabel('주성분 개수')
@@ -171,7 +197,9 @@ plt.show()
 print('새로운 이미지를 입력해 분류하기---')
 # 현재 모델의 분류 accurary : 0.2377151
 
+# -------------------- 새 이미지 예측 --------------------
 # 실습 1. 기존 데이터로 테스트
+# reshape(1, -1)은 이미지 1장을 "샘플 1개" 형태로 맞추기 위한 처리다.
 test_img = faces.data[0].reshape(1,-1)  # (1,2914) 형태로 변환 : 모델이 일차원 형태로 학습.
 print('test_img : ', test_img)
 test_pred = mymodel.predict(test_img)
@@ -182,7 +210,7 @@ print('실제값 : ', faces.target_names[faces.target[0]], 'index : ', faces.tar
 
 print()
 # 실습 2. 새로운 사진 데이터로 분류하기
-# 외부 이미지(bush.jpg)를 불러와 모델이 학습한 규격(62x47)으로 변환 후 예측
+# 외부 이미지를 불러와 모델이 학습한 규격(62x47)으로 변환 후 예측
 from PIL import Image
 
 img = Image.open("col.jpg").convert('L') # convert('L') : 흑백 변환
@@ -194,18 +222,21 @@ img_np = img_np.astype('float32')
 
 # [수정] 데이터 스케일링 맞춤 (LFW 데이터셋의 평균과 표준편차에 가깝게 조정)
 # 특정 인물(George W Bush)로 편향되는 현상을 막기 위해 입력 이미지의 분포를 학습 데이터와 유사하게 정규화
+# 외부 이미지는 밝기/대비가 학습 데이터와 다를 수 있으므로 간단한 정규화를 해 준다.
 img_np = (img_np - img_np.mean()) / img_np.std() # 로컬 정규화
 img_np = img_np * 65 + 120 # LFW 데이터셋의 대략적인 분포로 복원
 
 # 하이퍼파라미터 튜닝 (GridSearchCV) 적용 권장
 # class_weight='balanced'를 추가하여 데이터 불균형(부시 대통령 사진이 압도적으로 많음) 문제를 해결
+# GridSearchCV는 여러 하이퍼파라미터 조합을 비교해 가장 성능이 좋은 모델을 고른다.
 from sklearn.model_selection import GridSearchCV
 param_grid = {'svc__C': [1, 5, 10, 50], 'svc__gamma': [0.0001, 0.0005, 0.001, 0.005], 'svc__class_weight': ['balanced']}
 grid = GridSearchCV(mymodel, param_grid, cv=5)
 grid.fit(x_train, y_train)
 final_model = grid.best_estimator_
 
-img_flat = img_np.reshape(1, -1)  # 1차원으로 변환
+img_flat = img_np.reshape(1, -1)  # 모델 입력용 1차원 벡터로 변환
+# 최종 선택된 모델로 외부 이미지가 누구 얼굴과 가장 비슷한지 예측한다.
 new_pred = final_model.predict(img_flat)
 print('실습2 예측 결과 : ', faces.target_names[new_pred][0])
 
