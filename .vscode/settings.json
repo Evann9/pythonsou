@@ -1,0 +1,15 @@
+{
+    "python.defaultInterpreterPath": "C:\\Users\\acorn\\anaconda3\\envs\\myproject\\python.exe",
+    "python.terminal.activateEnvironment": true,
+    "terminal.integrated.defaultProfile.windows": "Conda myproject",
+    "terminal.integrated.profiles.windows": {
+        "Conda myproject": {
+            "path": "C:\\WINDOWS\\System32\\cmd.exe",
+            "args": [
+                "/K",
+                "call C:\\Users\\acorn\\anaconda3\\Scripts\\activate.bat C:\\Users\\acorn\\anaconda3\\envs\\myproject"
+            ],
+            "icon": "terminal-cmd"
+        }
+    }
+}

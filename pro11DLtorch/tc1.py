@@ -166,3 +166,4 @@ print(torch.rand(3))  # tensor([0.8823, 0.9150, 0.3829])
 # PyTorch는 기본적으로 Eager Execution 방식으로 동작한다.
 # 즉, 일반 Python 코드처럼 if, for, while을 그대로 사용할 수 있다.
 # 기본적으로 tf의 @tf.function / AutoGraph처럼 그래프 변환을 신경 쓸 필요가 없다.
+
