@@ -101,3 +101,26 @@ print('ev_loss : ', ev_loss)
 
 from sklearn.metrics import r2_score
 print('설명력 : ', r2_score(y_test, func_model.predict(x_test))) # 0.8308
+
+# tensorBoard 실행 ____
+# pip install tensorboard
+from tensorflow.keras.callbacks import TensorBoard
+import datetime
+import os
+
+# tensorboard 로그 저장 경로
+log_dir = os.path.join('logs','fit',datetime.datetime.now().strftime('%Y%m%d-%H%M%S'))
+
+tb = TensorBoard(
+    log_dir=log_dir, 
+    histogram_freq=1,
+    write_graph=True,
+    write_images=False
+)
+
+func_model.fit(x = x_train, y = y_train, epochs=100, batch_size=32, verbose=2, validation_split=0.2, callbacks=[tb])
+
+# 텐서보드 실행 후 결과는 브라우저로 확인
+# 터미널 프롬프트에서 > tensorboard --logdir logs/fit
+# 웹서비스가 시작됨. 여기서 확인
+
