@@ -1,3 +1,10 @@
+# 동물 속성으로 동물 유형을 분류하는 다중분류 예제
+#
+# 이 파일의 흐름
+# 1) 동물의 특징값을 feature로, class_type을 label로 사용한다.
+# 2) label이 1~7 정수이므로 sparse_categorical_crossentropy를 사용한다.
+# 3) classification_report와 confusion_matrix로 클래스별 성능을 확인한다.
+#
 # animal_name: Unique for each instance
 # hair Boolean
 # feathers Boolean
@@ -24,10 +31,12 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Input, Dropout
 from sklearn.model_selection import train_test_split
 
+# zoo.csv는 마지막 컬럼 class_type을 제외한 나머지 컬럼이 동물의 속성 feature이다.
 datas = pd.read_csv('https://raw.githubusercontent.com/pykwon/python/refs/heads/master/testdata_utf8/zoo.csv')
 print(datas.head(3))
 print(datas.info())
 
+# x_data: 모델 입력값, y_data: 정답 클래스 번호(1~7)
 x_data = datas.iloc[:, :-1].astype("float32").values
 y_data = datas.iloc[:, -1].astype("int32").values
 print(x_data[0], x_data.shape)
@@ -51,7 +60,7 @@ model = Sequential([
     Dropout(rate=0.3),
     Dense(units=32, activation='relu'),
     Dropout(rate=0.3),
-    Dense(units=7, activation='softmax'),
+    Dense(units=7, activation='softmax'), # 7개 동물 유형에 대한 확률을 출력
 ])
 print(model.summary())
 
@@ -81,6 +90,7 @@ plt.show()
 # 혼동행렬 출력
 from sklearn.metrics import classification_report, confusion_matrix
 import seaborn as sns
+# predict 결과는 클래스별 확률이므로 argmax로 가장 높은 확률의 class index를 고른다.
 y_pred = np.argmax(model.predict(x_test), axis=1)
 print('classification_report : \n', classification_report(y_test, y_pred))
 
@@ -92,6 +102,7 @@ plt.ylabel('true')
 plt.show()
 
 print('\n새로운 값으로 분류 예측')
+# 새 데이터도 학습에 사용한 feature 개수와 순서를 정확히 맞춰야 한다.
 new_data = np.array([[1,0,0,1,1,0,0,1,1,1,1,0,0,4,1,0]], dtype='float32')
 probs = model.predict(new_data)
 print('예측 확률 : ', probs)

@@ -2,6 +2,10 @@
 # 매출 = 광고비 * w + b
 # 매출 = 광고비1 * w1 + 광고비2 * w2 + b
 # 광고비와 매출의 관계가 직선이 아니라 곡선형태의 자료를 대상
+#
+# 이 파일의 목적
+# - 광고비가 증가할수록 매출이 증가하지만 어느 순간 증가폭이 둔화되는 상황을 만든다.
+# - 선형회귀와 2차 다항회귀를 같은 데이터에 적용해 어느 쪽이 곡선 관계를 잘 설명하는지 비교한다.
 
 # 다항회귀에 적합한 데이터 생성 -> CSV 파일로 저장 후 읽기 -> 산점도
 # -> train / test split -> 선형모델, 비선형모델 학습 후 성능 비교
@@ -19,6 +23,7 @@ tf.random.set_seed(7)
 ad_cost = np.linspace(0, 100, 80)   # 광고비 데이터
 # sales는 광고비에 따른 매출 데이터를 만드는 부분. 2차함수
 # sales = 광고비제곱 * -0.06 + 7.5 * 광고비 + 40 + noise 인위적으로 수식 작성
+# -0.06 * 광고비^2 항 때문에 오른쪽으로 갈수록 증가폭이 줄어드는 곡선이 된다.
 sales = (-0.06 * (ad_cost ** 2) + 7.5 * ad_cost + 40) + np.random.normal(0, 25, size=len(ad_cost))
 df = pd.DataFrame({'광고비':ad_cost, '매출':sales})
 print(df.head())
@@ -47,6 +52,7 @@ plt.grid(True)
 plt.show()
 
 # train / test split
+# 인덱스를 섞은 뒤 앞 80%는 학습, 뒤 20%는 테스트로 사용한다.
 indices = np.arange(len(x))
 np.random.shuffle(indices)
 x = x[indices]
@@ -61,6 +67,7 @@ print('x:', x_train.shape, x_test.shape)    # (64, 1)   (16, 1)
 print('y:', y_train.shape, y_test.shape)
 
 # Scaling : train 데이터 기준으로 평균과 표준편차 계산 후 표준화
+# x와 y 모두 스케일을 맞추면 optimizer가 더 안정적으로 손실을 줄일 수 있다.
 x_mean = x_train.mean(axis=0)
 x_std = x_train.std(axis=0)
 # 표준화
@@ -76,6 +83,7 @@ y_test_scaled = (y_test - y_mean) / y_std
 # 다항 특성 함수 : degree = 2이면 [x, x^2] 생성
 # 스케일링된 입력값을 다항회귀용 입력데이터로 변환
 def make_poly_features(x_scaled, degree=2):
+    # degree=3으로 바꾸면 [x, x^2, x^3]처럼 feature가 늘어난다.
     features = [x_scaled ** d for d in range(1, degree + 1)]
     return np.concatenate(features, axis=1).astype(np.float32)  # 배열을 열방향으로 붙임
 
@@ -103,6 +111,7 @@ def evaluate_model(name, y_true, y_pred):
     print('R2 : ', round(r2, 3))
 
 # 선형회귀 모델
+# 입력이 광고비 하나뿐이라 직선 형태의 관계만 표현한다.
 linear_model = tf.keras.models.Sequential([
     tf.keras.layers.Input(shape=(1, )),
     tf.keras.layers.Dense(units=1)
@@ -114,6 +123,7 @@ y_pred_linear_scaled = linear_model.predict(x_test_scaled, verbose=0)
 y_pred_linear = y_pred_linear_scaled * y_std + y_mean
 
 # 다항회귀 모델
+# 입력이 [광고비, 광고비^2] 두 개이므로 2차 곡선 형태를 표현할 수 있다.
 poly_model = tf.keras.models.Sequential([
     tf.keras.layers.Input(shape=(2, )),
     tf.keras.layers.Dense(units=1)
@@ -129,6 +139,7 @@ evaluate_model('선형회귀', y_test, y_pred_linear)
 evaluate_model('다항회귀(degree2)', y_test, y_pred_poly)
 
 # 시각화
+# 실제 train/test 점과 두 모델의 예측선을 같이 그려 모델 차이를 눈으로 확인한다.
 x_plot = np.linspace(x.min(), x.max(), 300).reshape(-1, 1).astype(np.float32)
 x_plot_scaled = (x_plot - x_mean) / x_std
 x_plot_poly = make_poly_features(x_plot_scaled, degree=2)

@@ -1,5 +1,10 @@
 # imdb dataset으로 이진 분류 : 영화 리뷰(긍정,부정)
 # train : 25000, test : 25000
+#
+# 이 파일의 흐름
+# 1) 영화 리뷰 문장을 단어 번호 배열로 읽는다.
+# 2) 길이가 다른 리뷰를 padding으로 같은 길이에 맞춘다.
+# 3) Embedding으로 단어 번호를 벡터로 바꾸고 긍정/부정을 분류한다.
 
 from tensorflow.keras.datasets import imdb
 from tensorflow.keras.preprocessing.sequence import pad_sequences
@@ -15,6 +20,7 @@ import os
 
 num_words = 10000
 # 자주 등장하는 단어 1만개만 사용
+# num_words를 제한하면 너무 드문 단어를 버려 메모리와 학습 부담을 줄일 수 있다.
 (train_data, train_label), (test_data, test_label) = imdb.load_data(num_words=10000)
 print(type(train_data), train_data.shape)   # <class 'numpy.ndarray'> (25000,)
 print(type(test_data), test_data.shape)     # <class 'numpy.ndarray'> (25000,)
@@ -23,6 +29,7 @@ print(train_data[0], len(train_data[0]))    # ... 19, 178, 32, 218
 print(train_label[0])   # 0-부정 , 1-긍정
 
 # 참고로 이 리뷰 데이터 한 개를 원래 문장으로 보기
+# Keras IMDB 데이터는 문장 자체가 아니라 단어 index 리스트로 제공된다.
 word_index = imdb.get_word_index()
 # print('word_index : ', word_index)
 sorted_word_index = sorted(word_index.items(), key=lambda x:x[1])
@@ -63,6 +70,7 @@ plt.show()
 
 # padding : 리뷰 문장 길이가 다름. 모델에 넣기 전에 길이를 맞춤
 # 각 리뷰를 최대 200 단어 index로 맞춤. 길면 앞부분 자르고, 짧으면 0을 채움
+# 신경망은 한 batch 안의 입력 길이가 같아야 하므로 padding이 필요하다.
 maxlen = 200
 x_train = pad_sequences(train_data, maxlen=maxlen)
 x_test = pad_sequences(test_data, maxlen=maxlen)
@@ -102,6 +110,7 @@ print(model.summary())  # Total params: 321, 601 (1.23 MB)
 
 model.compile(optimizer=Adam(learning_rate=0.001), loss='binary_crossentropy', metrics=['accuracy'])
 
+# NLP 모델도 과적합이 빨리 올 수 있어 validation loss 기준으로 조기 종료한다.
 early_stop = EarlyStopping(monitor='val_loss', patience=3, restore_best_weights=True)
 chkpoint = ModelCheckpoint(filepath=modelpath, monitor='val_loss', save_best_only=True, verbose=0)
 
@@ -137,6 +146,7 @@ print('best_model 평가 손실 : ', best_loss)
 print('best_model 평가 정확도 : ', best_acc)
 
 # 기존 데이터를 사용해 예측
+# sigmoid 확률이 0.5 이상이면 긍정, 미만이면 부정으로 해석한다.
 new_data = x_test[:5]
 new_label = y_test[:5]
 pred_prob = best_model.predict(new_data, verbose=0)

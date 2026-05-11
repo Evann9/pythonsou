@@ -16,6 +16,11 @@
 # loss, accuracy에 대한 시각화를 실시한다.
 
 # https://raw.githubusercontent.com/pykwon/python/refs/heads/master/testdata_utf8/pima-indians-diabetes.data.csv
+#
+# 이 파일의 흐름
+# 1) 피마 인디언 당뇨병 데이터를 읽어 8개 feature와 Outcome label로 나눈다.
+# 2) 같은 문제를 Sequential API와 Functional API로 각각 풀어본다.
+# 3) EarlyStopping과 ModelCheckpoint로 과적합을 줄이고 가장 좋은 모델을 저장한다.
 
 import pandas as pd
 import numpy as np
@@ -28,16 +33,19 @@ from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 import os
 
 # 데이터 읽기, 컬럼명이 없어서 직접 지정
+# names를 지정하지 않으면 첫 행을 컬럼명으로 오해할 수 있으므로 직접 붙인다.
 url = "https://raw.githubusercontent.com/pykwon/python/refs/heads/master/testdata_utf8/pima-indians-diabetes.data.csv"
 names = ['Pregnancies', 'Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI', 'DiabetesPedigreeFunction', 'Age', 'Outcome']
 df = pd.read_csv(url, names=names)
 
 # 전처리 (독립변수, 종속변수 분리)
+# x는 진단에 필요한 수치 정보, y는 당뇨 여부 정답(0/1)이다.
 dataset = df.values
 x = dataset[:, 0:8]
 y = dataset[:, 8]
 
 # 스케일링 실시 (값 범위 맞춰줌)
+# 포도당, 나이, BMI처럼 단위가 다른 feature들을 비슷한 범위로 맞춘다.
 scaler = StandardScaler()
 x_scaled = scaler.fit_transform(x)
 
@@ -50,6 +58,7 @@ if not os.path.exists(MODEL_DIR):
     os.mkdir(MODEL_DIR)
 
 print('--- 1. Sequential API 모델 ---')
+# Sequential은 입력부터 출력까지 일렬로 쌓는 가장 간단한 작성 방식이다.
 seq_model = Sequential()
 seq_model.add(Input(shape=(8, )))
 seq_model.add(Dense(units=24, activation='relu'))
@@ -70,6 +79,7 @@ print(f'Sequential 모델 평가 - 손실: {seq_eval[0]:.4f}, 정확도: {seq_ev
 # Sequential 모델 평가 - 손실: 0.4673, 정확도: 0.7706
 
 print('\n--- 2. Functional API 모델 ---')
+# Functional API는 layer 연결을 변수로 받아 직접 연결하므로 복잡한 구조로 확장하기 쉽다.
 inputs = Input(shape=(8, ))
 h1 = Dense(units=24, activation='relu')(inputs)
 h2 = Dense(units=12, activation='relu')(h1)
@@ -90,6 +100,7 @@ print(f'Functional 모델 평가 - 손실: {func_eval[0]:.4f}, 정확도: {func_
 # Functional 모델 평가 - 손실: 0.4839, 정확도: 0.7662
 
 # 시각화 처리
+# train/validation 곡선을 함께 보면 과적합 여부를 확인할 수 있다.
 # Seq Loss
 plt.figure()
 plt.plot(seq_hist.epoch, seq_hist.history['loss'], label='train loss')
@@ -123,6 +134,7 @@ plt.legend()
 plt.show()
 
 # 예측
+# 앞의 5개 테스트 샘플을 넣어 두 모델의 예측 클래스와 실제 정답을 비교한다.
 new_data = x_test[:5]
 
 print('\n--- Sequential API 모델 예측 ---')

@@ -1,4 +1,9 @@
 # 딥러닝으로 이진분류 - 전통적 방식인 LogisticRegression의 확장
+#
+# 이 파일의 흐름
+# 1) 작은 2차원 데이터를 0/1 두 클래스로 분류한다.
+# 2) Sequential, Functional, 다중 입력, Subclassing API로 같은 이진분류 구조를 작성한다.
+# 3) sigmoid 출력값을 0.5 기준으로 클래스 0/1로 바꾸는 방법을 확인한다.
 
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Input
@@ -9,6 +14,7 @@ import numpy as np
 np.random.seed(42)
 tf.keras.utils.set_random_seed(42)
 
+# x_data는 feature 2개를 가진 샘플 6개이고, y_data는 각 샘플의 정답 클래스이다.
 x_data = np.array([[1,2],[2,3],[3,4],[4,3],[3,2],[2,1]], dtype=np.float32)
 y_data = np.array([[0],[0],[0],[1],[1],[1]], dtype=np.float32)
 
@@ -18,6 +24,7 @@ model = Sequential([
     Input(shape=(2, )),
     Dense(units=1, activation='sigmoid')
 ])
+# 위 모델은 바로 아래에서 다시 만들기 때문에, add() 방식과 리스트 방식의 차이를 보여주는 예시로 보면 된다.
 model = Sequential()
 model.add(Input(shape=(2, )))
 model.add(Dense(units=4, activation='relu'))
@@ -25,6 +32,7 @@ model.add(Dense(units=1, activation='sigmoid'))
 print(model.summary())
 
 # Binary Cross-Entropy(BCE)는 이진 분류(0 또는 1) 문제에서 모델의 예측 확률값과 실제값 사이의 오차를 계산한다.
+# 출력층이 sigmoid이므로 모델의 출력은 "1번 클래스일 확률"로 해석한다.
 model.compile(loss='binary_crossentropy', optimizer=Adam(learning_rate=0.01), metrics=['accuracy'])
 model.fit(x_data, y_data, epochs=20, batch_size=1, verbose=2)
 m_eval = model.evaluate(x_data, y_data, verbose=0)
@@ -60,6 +68,7 @@ plt.show()
 
 from sklearn.metrics import accuracy_score
 pred = model.predict(x_data, verbose=0)
+# 확률값을 사람이 이해하는 클래스값으로 바꾸기 위해 threshold 0.5를 사용한다.
 pred_class = (pred >= 0.5).astype(int)
 accuracy = accuracy_score(y_data, pred_class)
 print(f'1) 정확도 | {accuracy:.4f}')
@@ -78,6 +87,7 @@ print('2) Functional API 버전 (실무에서 주로 사용)')
 from tensorflow.keras.models import Model
 
 inputs = Input(shape=(2, ))
+# Functional API는 이전 layer의 결과를 다음 layer 함수에 넣는 방식으로 연결 관계를 직접 표현한다.
 outputs = Dense(units=4, activation='relu')(inputs)
 outputs = Dense(units=1, activation='sigmoid')(outputs)
 model_func = Model(inputs=inputs, outputs=outputs)
@@ -101,6 +111,7 @@ from tensorflow.keras.layers import Concatenate
 input1 = Input(shape = (1, ))
 input2 = Input(shape = (1, ))
 # 각각 처리
+# 두 feature를 따로 입력받으면 feature마다 다른 전처리/은닉층을 적용할 수 있다.
 x1 = Dense(units=2, activation='relu')(input1)
 x2 = Dense(units=4, activation='relu')(input2)
 
@@ -121,6 +132,7 @@ print(f'평가 결과 : 손실={m_eval2_multi[0]:.4f}, 정확도={m_eval2_multi[
 
 print('\n3) Functional API 버전2 (다중 입력)')
 class MyModel(Model):
+    # Subclassing 방식은 layer를 속성으로 보관하고 call()에서 순전파를 직접 작성한다.
     def __init__(self):
         super().__init__()
         # 사용할 레이어를 미리 정의
