@@ -1,0 +1,74 @@
+
+/* 수동 좌표 추가 / 좌표 변경 버튼 */
+.bp-manual-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.bp-manual-actions .bp-btn {
+  flex: 1;
+}
+
+/* 선택 좌표 체크박스 + 우측 버튼 정렬 */
+.bp-coord-item {
+  grid-template-columns: 26px 34px 1fr 170px;
+  cursor: default;
+}
+
+.bp-coord-check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bp-coord-checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #2563eb;
+}
+
+.bp-coord-buttons {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+}
+
+.bp-move-btn,
+.bp-delete-btn {
+  min-width: 48px;
+  height: 36px;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.bp-delete-btn {
+  min-width: 58px;
+}
+
+.bp-coord-item.editing {
+  border: 2px solid #2563eb;
+  background: #eff6ff;
+}
+
+.bp-edit-hint {
+  margin-top: 4px;
+  font-size: 0.78rem;
+  color: #2563eb;
+  font-weight: 700;
+}
+
+@media (max-width: 640px) {
+  .bp-manual-actions {
+    flex-direction: column;
+  }
+
+  .bp-coord-item {
+    grid-template-columns: 1fr;
+  }
+
+  .bp-coord-buttons {
+    justify-content: flex-start;
+  }
+}

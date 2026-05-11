@@ -1,0 +1,18 @@
+
+/* 좌표 선택 체크박스 */
+.bp-coord-item {
+  grid-template-columns: 26px 34px 1fr auto;
+}
+
+.bp-coord-check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bp-coord-checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #2563eb;
+}
